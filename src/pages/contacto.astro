@@ -1,0 +1,53 @@
+---
+import Base from '../layouts/Base.astro';
+import { site, enlaceContacto } from '../config/site';
+import { migas, negocio } from '../lib/seo';
+---
+
+<Base
+  titulo={`Contacto | Agenda tu asesoría de imagen en ${site.ciudad}`}
+  descripcion={`Escríbele a ${site.persona} para agendar tu valoración de imagen. Asesorías presenciales en ${site.ciudad} y virtuales.`}
+  jsonld={[negocio, migas([{ nombre: 'Inicio', ruta: '/' }, { nombre: 'Contacto', ruta: '/contacto' }])]}
+>
+  <section class="seccion">
+    <div class="contenedor dos" style="align-items:start">
+      <div>
+        <p class="kicker">Contacto</p>
+        <h1 style="font-size:clamp(2.4rem,6vw,4.2rem)">Hablemos de <em>tu imagen</em></h1>
+        <hr class="regla" />
+        <p class="entrada">
+          Cuéntame qué quieres conseguir con tu imagen y juntas encontraremos el punto de partida que mejor se adapte a
+          ti.
+        </p>
+        <p>
+          Si no sabes por dónde empezar, la <a href="/servicios/valoracion-de-imagen-estrategica"
+            >Valoración de Imagen Estratégica</a
+          > es el primer paso.
+        </p>
+      </div>
+      <dl class="ficha">
+        {
+          site.whatsapp && (
+            <>
+              <dt>WhatsApp</dt>
+              <dd>
+                <a href={enlaceContacto()} target="_blank" rel="noopener">
+                  Escríbeme por WhatsApp
+                </a>
+              </dd>
+            </>
+          )
+        }
+        <dt>Instagram</dt>
+        <dd>
+          <a href={`https://www.instagram.com/${site.instagram}/`} target="_blank" rel="noopener">@{site.instagram}</a>
+        </dd>
+        <dt>Correo</dt>
+        <dd><a href={`mailto:${site.email}`}>{site.email}</a></dd>
+        <dt>Modalidad</dt>
+        <dd>Presencial en {site.ciudad} · Virtual · Híbrida</dd>
+        <a class="boton" style="width:100%" href={enlaceContacto()} target="_blank" rel="noopener">Agenda tu valoración</a>
+      </dl>
+    </div>
+  </section>
+</Base>

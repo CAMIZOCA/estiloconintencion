@@ -1,0 +1,54 @@
+---
+import Base from '../../layouts/Base.astro';
+import Cuestionario from '../../components/Cuestionario.astro';
+import { idMarca, tablas } from '../../data/cuestionarios/estilo';
+
+// Cada tabla se reparte en dos pasos: Interior, y Cuerpo + Indumentaria.
+const pasos = tablas.flatMap((t) => [
+  { tabla: t, secciones: t.secciones.slice(0, 1), parte: 1 },
+  { tabla: t, secciones: t.secciones.slice(1), parte: 2 },
+]);
+---
+
+<Base
+  titulo="Cuestionario de Estilo"
+  descripcion="Completa tu cuestionario de estilo antes de nuestra valoración. Te tomará unos 10 minutos."
+  imagen="/og/cuestionario-estilo.jpg"
+  noindex
+  simple
+>
+  <Cuestionario
+    id="estilo"
+    titulo="Cuestionario de Estilo"
+    intro={[
+      'Tu imagen y estilo no son solo cómo te ves, sino también lo que llevas por dentro.',
+      'Este cuestionario nos ayudará a identificar tus aspectos positivos y aquellos que quisieras mejorar. No hay respuestas correctas: marca con sinceridad todo aquello con lo que te identifiques. Te tomará unos 10 minutos.',
+    ]}
+  >
+    {
+      pasos.map(({ tabla, secciones, parte }) => (
+        <fieldset data-paso>
+          <p class="kicker">{tabla.titulo} · parte {parte} de 2</p>
+          <h2>{tabla.titulo}</h2>
+          <p>{tabla.instruccion}</p>
+          <p style="color:var(--gris);font-size:.92rem">Puedes marcar todas las que quieras.</p>
+          {secciones.map((s) => (
+            <>
+              <h3>{s.titulo}</h3>
+              <div class="chips">
+                {s.filas.map((fila, f) =>
+                  fila.map((opcion, c) => (
+                    <label class="chip">
+                      <input type="checkbox" name="m" value={idMarca(tabla.id, s.id, f, c)} />
+                      <span>{opcion}</span>
+                    </label>
+                  )),
+                )}
+              </div>
+            </>
+          ))}
+        </fieldset>
+      ))
+    }
+  </Cuestionario>
+</Base>

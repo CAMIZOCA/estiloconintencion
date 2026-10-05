@@ -1,0 +1,116 @@
+---
+import '../styles/cuestionario.css';
+
+interface Props {
+  id: 'estilo' | 'somatotipos';
+  titulo: string;
+  intro: string[];
+}
+const { id, titulo, intro } = Astro.props;
+---
+
+<form class="cuest" method="post" action="/api/respuestas" novalidate>
+  <input type="hidden" name="cuestionario" value={id} />
+  <label class="trampa" aria-hidden="true">
+    No llenar <input type="text" name="web" tabindex="-1" autocomplete="off" />
+  </label>
+
+  <div class="cuest__progreso" aria-live="polite">
+    <span data-progreso-texto></span>
+    <div class="cuest__barra"><div data-progreso-barra></div></div>
+  </div>
+
+  <fieldset data-paso>
+    <p class="kicker">Estilo con Intención · Vilma Chacón</p>
+    <h1>{titulo}</h1>
+    <hr class="regla" />
+    {intro.map((p) => <p>{p}</p>)}
+    <h3>Tus datos</h3>
+    <label class="campo">
+      <span>Nombre y apellido</span>
+      <input type="text" name="nombre" required minlength="2" maxlength="120" autocomplete="name" />
+    </label>
+    <label class="campo">
+      <span>WhatsApp o correo</span>
+      <input type="text" name="contacto" required minlength="5" maxlength="120" />
+    </label>
+    <label class="consentimiento">
+      <input type="checkbox" name="consentimiento" value="1" required />
+      <span>
+        Acepto que Vilma Chacón guarde mis respuestas para preparar mi asesoría, según la
+        <a href="/privacidad" target="_blank">política de privacidad</a>.
+      </span>
+    </label>
+  </fieldset>
+
+  <slot />
+
+  <p class="cuest__error" data-error hidden></p>
+  <div class="cuest__nav">
+    <button type="button" class="boton boton--linea" data-atras hidden>Atrás</button>
+    <button type="button" class="boton" data-siguiente>Siguiente</button>
+    <button type="submit" class="boton" data-enviar>Enviar respuestas</button>
+  </div>
+</form>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('.cuest')!;
+  const pasos = [...form.querySelectorAll<HTMLElement>('[data-paso]')];
+  const atras = form.querySelector<HTMLButtonElement>('[data-atras]')!;
+  const siguiente = form.querySelector<HTMLButtonElement>('[data-siguiente]')!;
+  const enviar = form.querySelector<HTMLButtonElement>('[data-enviar]')!;
+  const texto = form.querySelector<HTMLElement>('[data-progreso-texto]')!;
+  const barra = form.querySelector<HTMLElement>('[data-progreso-barra]')!;
+  const error = form.querySelector<HTMLElement>('[data-error]')!;
+  let actual = 0;
+
+  function mostrar(i: number) {
+    actual = i;
+    pasos.forEach((p, n) => p.classList.toggle('activo', n === i));
+    const ultimo = i === pasos.length - 1;
+    atras.hidden = i === 0;
+    siguiente.hidden = ultimo;
+    enviar.hidden = !ultimo;
+    error.hidden = true;
+    texto.textContent = `Paso ${i + 1} de ${pasos.length}`;
+    barra.style.width = `${((i + 1) / pasos.length) * 100}%`;
+    window.scrollTo({ top: 0 });
+  }
+
+  // Valida solo los campos del paso visible; devuelve el primer campo con problema.
+  function invalido(paso: HTMLElement) {
+    return [...paso.querySelectorAll<HTMLInputElement>('input')].find((c) => !c.checkValidity());
+  }
+
+  function comprobar() {
+    const campo = invalido(pasos[actual]);
+    if (!campo) return true;
+    error.textContent =
+      campo.type === 'radio'
+        ? 'Te falta responder una pregunta de este paso.'
+        : campo.type === 'checkbox'
+          ? 'Marca la casilla de consentimiento para continuar.'
+          : 'Completa tu nombre y tu contacto para continuar.';
+    error.hidden = false;
+    (campo.closest('.pregunta, .campo, .consentimiento') ?? campo).scrollIntoView({ block: 'center', behavior: 'smooth' });
+    if (campo.type !== 'radio') campo.focus({ preventScroll: true });
+    return false;
+  }
+
+  form.classList.add('js');
+  siguiente.addEventListener('click', () => comprobar() && mostrar(actual + 1));
+  atras.addEventListener('click', () => mostrar(actual - 1));
+  form.addEventListener('submit', (e) => {
+    if (!comprobar()) return e.preventDefault();
+    enviar.disabled = true;
+    enviar.textContent = 'Enviando…';
+  });
+  // Enter en un campo de texto avanza de paso en lugar de enviar el formulario incompleto.
+  form.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && (e.target as HTMLElement).tagName === 'INPUT' && actual < pasos.length - 1) {
+      e.preventDefault();
+      siguiente.click();
+    }
+  });
+  mostrar(0);
+</script>

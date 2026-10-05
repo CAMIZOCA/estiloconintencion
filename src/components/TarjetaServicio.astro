@@ -1,0 +1,27 @@
+---
+import type { Servicio } from '../data/servicios';
+
+interface Props {
+  servicio: Servicio;
+}
+const { servicio: s } = Astro.props;
+---
+
+<a class:list={['tarjeta', { 'tarjeta--destacada': s.destacado }]} href={`/servicios/${s.slug}`}>
+  {s.destacado && <span class="tarjeta__sello">★ Más elegido</span>}
+  <span class="tarjeta__num">Servicio {s.numero}</span>
+  <h3>{s.nombre}</h3>
+  <p>{s.lema}</p>
+  <div class="tarjeta__pie">
+    <span class="tarjeta__dur">{s.duracion}</span>
+    <span>
+      {
+        s.precios.map((p) => (
+          <span class="precio">
+            {p.etiqueta && <small>{p.etiqueta}</small>}${p.valor}
+          </span>
+        ))
+      }
+    </span>
+  </div>
+</a>

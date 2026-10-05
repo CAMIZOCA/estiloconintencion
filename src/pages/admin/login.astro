@@ -1,0 +1,28 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../styles/admin.css';
+import { haySesion } from '../../lib/auth';
+
+export const prerender = false;
+
+if (await haySesion(Astro.cookies)) return Astro.redirect('/admin');
+const error = Astro.url.searchParams.get('error');
+---
+
+<Base titulo="Panel privado" noindex simple>
+  <form class="login admin" method="post" action="/api/admin/login" style="padding:2rem">
+    <p class="kicker">Panel privado</p>
+    <h1>Ingresar</h1>
+    <label>
+      <span class="oculto-visual">Contraseña</span>
+      <input type="password" name="clave" placeholder="Contraseña" required autocomplete="current-password" autofocus />
+    </label>
+    <button class="boton" type="submit">Entrar</button>
+    {error === 'clave' && <p class="cuest__error" style="color:var(--burdeos);margin-top:1rem">Contraseña incorrecta.</p>}
+    {
+      error === 'bloqueado' && (
+        <p style="color:var(--burdeos);margin-top:1rem">Demasiados intentos. Espera 15 minutos y vuelve a probar.</p>
+      )
+    }
+  </form>
+</Base>

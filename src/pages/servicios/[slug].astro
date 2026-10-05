@@ -1,0 +1,100 @@
+---
+import Base from '../../layouts/Base.astro';
+import TarjetaServicio from '../../components/TarjetaServicio.astro';
+import CTA from '../../components/CTA.astro';
+import { enlaceContacto, etiquetaContacto } from '../../config/site';
+import { servicios, type Servicio } from '../../data/servicios';
+import { migas, negocio, servicioLd } from '../../lib/seo';
+
+export function getStaticPaths() {
+  return servicios.map((s) => ({ params: { slug: s.slug }, props: { s } }));
+}
+
+const { s } = Astro.props as { s: Servicio };
+const otros = servicios.filter((o) => o.slug !== s.slug && o.grupo === s.grupo).slice(0, 3);
+const mensaje = `Hola Vilma, me interesa el servicio "${s.nombre}".`;
+---
+
+<Base
+  titulo={s.seoTitulo}
+  descripcion={s.seoDescripcion}
+  jsonld={[
+    negocio,
+    servicioLd(s),
+    migas([
+      { nombre: 'Inicio', ruta: '/' },
+      { nombre: 'Servicios', ruta: '/servicios' },
+      { nombre: s.nombre, ruta: `/servicios/${s.slug}` },
+    ]),
+  ]}
+>
+  <section class="seccion">
+    <div class="contenedor">
+      <nav class="migas" aria-label="Migas de pan">
+        <a href="/">Inicio</a> / <a href="/servicios">Servicios</a> / {s.nombre}
+      </nav>
+      <div class="dos" style="align-items:start">
+        <div>
+          <p class="kicker">Servicio {s.numero}{s.destacado && ' · ★ Más elegido'}</p>
+          <h1 style="font-size:clamp(2.2rem,5.5vw,3.8rem)">{s.nombre}</h1>
+          <hr class="regla" />
+          <p class="entrada">{s.lema}</p>
+          <p>{s.descripcion}</p>
+          <h2 style="font-size:1.5rem;margin-top:2rem">Qué incluye</h2>
+          <ul class="incluye">
+            {s.incluye.map((i) => <li>{i}</li>)}
+          </ul>
+          {s.nota && <p class="aviso">{s.nota}</p>}
+        </div>
+        <aside>
+          {
+            s.imagen && (
+              <img
+                src={`/img/${s.imagen}.webp`}
+                alt={s.nombre}
+                loading="lazy"
+                style="aspect-ratio:4/3;margin-bottom:1.25rem"
+              />
+            )
+          }
+          <dl class="ficha">
+            <dt>Duración</dt>
+            <dd>{s.duracion}</dd>
+            <dt>Modalidad</dt>
+            <dd>Presencial en Guayaquil, virtual o híbrida</dd>
+            <dt>Inversión</dt>
+            <dd>
+              {
+                s.precios.map((p) => (
+                  <span class="precio" style="font-size:2.6rem">
+                    {p.etiqueta && <small>{p.etiqueta}</small>}${p.valor}
+                  </span>
+                ))
+              }
+            </dd>
+            <a class="boton" style="width:100%" href={enlaceContacto(mensaje)} target="_blank" rel="noopener">
+              {etiquetaContacto}
+            </a>
+          </dl>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  {
+    otros.length > 0 && (
+      <section class="seccion seccion--blanca">
+        <div class="contenedor">
+          <h2>También te puede interesar</h2>
+          <div class="rejilla">
+            {otros.map((o) => (
+              <TarjetaServicio servicio={o} />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <CTA mensaje={mensaje} />
+</Base>

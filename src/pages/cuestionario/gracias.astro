@@ -1,0 +1,20 @@
+---
+import Base from '../../layouts/Base.astro';
+import { site } from '../../config/site';
+---
+
+<Base titulo="¡Gracias! Recibimos tus respuestas" noindex simple>
+  <section class="seccion">
+    <div class="contenedor" style="text-align:center;max-width:40rem">
+      <p class="kicker">Respuestas recibidas</p>
+      <h1 style="font-size:clamp(2.4rem,7vw,4rem)">Nos vemos en <em>nuestra sesión</em></h1>
+      <hr class="regla" style="margin-inline:auto" />
+      <p class="entrada" style="margin-inline:auto">
+        ¡Gracias! Tus respuestas llegaron a {site.persona}. Las revisaremos juntas en tu valoración.
+      </p>
+      <div class="acciones" style="justify-content:center">
+        <a class="boton boton--linea" href="/">Conoce Estilo con Intención</a>
+      </div>
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,99 @@
+---
+import Base from '../../layouts/Base.astro';
+import Cuestionario from '../../components/Cuestionario.astro';
+import { comunicacion, estetico, letras, preguntas } from '../../data/cuestionarios/somatotipos';
+
+const POR_PASO = 4;
+const bloques = Array.from({ length: Math.ceil(preguntas.length / POR_PASO) }, (_, b) =>
+  preguntas.slice(b * POR_PASO, (b + 1) * POR_PASO).map((p, i) => ({ ...p, n: b * POR_PASO + i })),
+);
+---
+
+<Base
+  titulo="Test de Somatotipos"
+  descripcion="Completa tu test de somatotipos antes de nuestra sesión. Te tomará unos 5 minutos."
+  imagen="/og/test-somatotipos.jpg"
+  noindex
+  simple
+>
+  <Cuestionario
+    id="somatotipos"
+    titulo="Test de Somatotipos"
+    intro={[
+      'Está comprobado que hay una relación directa entre la belleza interior y la belleza exterior, y es cuando ambas están en armonía que alcanzamos una imagen total positiva.',
+      'Este test te ayudará a conocer un poco mejor la relación que tienes con tu cuerpo y cómo lo usas para comunicarte con el exterior. Respóndelo con sinceridad; te tomará unos 5 minutos.',
+    ]}
+  >
+    {
+      bloques.map((bloque, b) => (
+        <fieldset data-paso>
+          <p class="kicker">1 · Tu forma física predominante · parte {b + 1} de {bloques.length}</p>
+          {b === 0 && (
+            <>
+              <h2>Identifiquemos tu forma física</h2>
+              <p>Estas preguntas te permitirán descubrir cómo se comporta tu cuerpo.</p>
+            </>
+          )}
+          {bloque.map((p) => (
+            <fieldset class="pregunta">
+              <legend>{p.texto}</legend>
+              {p.opciones.map((o, i) => (
+                <label class="opcion">
+                  <input type="radio" name={`q${p.n}`} value={letras[i]} required />
+                  <span>{o}</span>
+                </label>
+              ))}
+            </fieldset>
+          ))}
+        </fieldset>
+      ))
+    }
+
+    <fieldset data-paso>
+      <p class="kicker">2 · Tu forma de comunicación</p>
+      <h2>Identifiquemos tu forma de comunicación predominante</h2>
+      <p>
+        Piensa un poco en las conversaciones que tienes con diferentes tipos de personas y trata de identificar con cuál
+        de las siguientes opciones te identificas en la mayoría de las ocasiones.
+      </p>
+      <fieldset class="pregunta">
+        <legend>Tu comunicación interna está enfocada a:</legend>
+        {
+          comunicacion.map((c) => (
+            <label class="opcion">
+              <input type="radio" name="com" value={c.valor} required />
+              <span>
+                <ul>
+                  {c.puntos.map((x) => (
+                    <li>{x}</li>
+                  ))}
+                </ul>
+                <em>«{c.estres}»</em>
+              </span>
+            </label>
+          ))
+        }
+      </fieldset>
+    </fieldset>
+
+    <fieldset data-paso>
+      <p class="kicker">3 · Tu estética personal</p>
+      <h2>Identifiquemos tu somatotipo estético predominante</h2>
+      <p>
+        Ahora piensa en tu estética personal. Marca la opción con la que te identifiques en la mayoría de las ocasiones
+        con respecto a tu imagen, tu atuendo o la forma como te vistes.
+      </p>
+      <fieldset class="pregunta">
+        <legend>Me identifico con:</legend>
+        {
+          estetico.map((e) => (
+            <label class="opcion">
+              <input type="radio" name="est" value={e.valor} required />
+              <span>{e.texto}</span>
+            </label>
+          ))
+        }
+      </fieldset>
+    </fieldset>
+  </Cuestionario>
+</Base>

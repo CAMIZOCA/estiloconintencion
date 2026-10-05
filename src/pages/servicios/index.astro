@@ -1,0 +1,48 @@
+---
+import Base from '../../layouts/Base.astro';
+import TarjetaServicio from '../../components/TarjetaServicio.astro';
+import CTA from '../../components/CTA.astro';
+import { site } from '../../config/site';
+import { grupos, servicios } from '../../data/servicios';
+import { migas, negocio, servicioLd } from '../../lib/seo';
+
+const lista = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'Servicios de asesoría de imagen',
+  itemListElement: servicios.map((s, i) => ({ '@type': 'ListItem', position: i + 1, item: servicioLd(s) })),
+};
+---
+
+<Base
+  titulo={`Servicios y precios de asesoría de imagen en ${site.ciudad}`}
+  descripcion="Servicios y precios 2026 de Vilma Chacón: valoración de imagen, colorimetría, detox de clóset, estilo personal, imagen profesional, asesoría para hombres y maleta de viaje."
+  jsonld={[negocio, lista, migas([{ nombre: 'Inicio', ruta: '/' }, { nombre: 'Servicios', ruta: '/servicios' }])]}
+>
+  <section class="seccion" style="padding-bottom:1rem">
+    <div class="contenedor">
+      <p class="kicker">Servicios y precios 2026</p>
+      <h1>Asesoría de imagen <em>personalizada</em></h1>
+      <hr class="regla" />
+      <p class="entrada">
+        Presencial en {site.ciudad}, virtual o híbrida. Elige por dónde empezar: todos los valores están en dólares.
+      </p>
+    </div>
+  </section>
+
+  {
+    grupos.map((g, i) => (
+      <section class:list={['seccion', { 'seccion--blanca': i % 2 === 1 }]}>
+        <div class="contenedor">
+          <h2>{g.titulo}</h2>
+          <p class="entrada">{g.texto}</p>
+          <div class="rejilla">
+            {servicios.filter((s) => s.grupo === g.id).map((s) => <TarjetaServicio servicio={s} />)}
+          </div>
+        </div>
+      </section>
+    ))
+  }
+
+  <CTA />
+</Base>

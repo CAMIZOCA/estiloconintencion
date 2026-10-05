@@ -1,0 +1,207 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../styles/admin.css';
+import { estilos, tablas, idMarca } from '../../data/cuestionarios/estilo';
+import { comunicacion, estetico, preguntas, letras, puntosPorLetra } from '../../data/cuestionarios/somatotipos';
+import type { ResultadoEstilo, ResultadoSomatotipos, RespuestasSomatotipos } from '../../lib/puntaje';
+import { fecha, nombresCuestionario, obtener } from '../../lib/respuestas';
+
+export const prerender = false;
+
+const fila = await obtener(Astro.params.id!);
+if (!fila) return Astro.redirect('/admin');
+
+const respuestas = JSON.parse(fila.respuestas_json);
+const resultado = JSON.parse(fila.resultado_json);
+const esEstilo = fila.cuestionario === 'estilo';
+
+const marcas = new Set<string>(esEstilo ? respuestas.marcas : []);
+const rEstilo = resultado as ResultadoEstilo;
+const rSoma = resultado as ResultadoSomatotipos;
+const soma = respuestas as RespuestasSomatotipos;
+const max = (sumas: number[]) => Math.max(...sumas, 1);
+---
+
+<Base titulo={`${fila.nombre} — ${nombresCuestionario[fila.cuestionario]}`} noindex simple>
+  <div class="admin">
+    <div class="admin__barra no-imprimir">
+      <a href="/admin">← Todas las respuestas</a>
+      <div class="admin__grupo">
+        <button class="boton" type="button" onclick="window.print()">Descargar PDF</button>
+        <form method="post" action="/api/admin/eliminar" onsubmit="return confirm('¿Eliminar esta respuesta? No se puede deshacer.')">
+          <input type="hidden" name="id" value={fila.id} />
+          <button class="boton boton--linea" type="submit">Eliminar</button>
+        </form>
+      </div>
+    </div>
+
+    <p class="kicker">{nombresCuestionario[fila.cuestionario]}</p>
+    <h1>{fila.nombre}</h1>
+    <p>{fila.contacto} · {fecha(fila.creado_en)}</p>
+
+    {
+      esEstilo ? (
+        <>
+          <div class="resultado">
+            <div>
+              <small>Estilo potenciador</small>
+              <strong>{rEstilo.potenciador.join(' / ') || '—'}</strong>
+            </div>
+            <div>
+              <small>Estilo limitante</small>
+              <strong>{rEstilo.limitante.join(' / ') || '—'}</strong>
+            </div>
+          </div>
+
+          <h2>Suma por estilo</h2>
+          <div class="tabla-envoltura">
+            <table class="tabla tabla--num">
+              <thead>
+                <tr>
+                  <th />
+                  {estilos.map((e) => (
+                    <th>{e}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Aspectos positivos</td>
+                  {rEstilo.positivos.map((n) => (
+                    <td class:list={{ max: n === max(rEstilo.positivos) }}>{n}</td>
+                  ))}
+                </tr>
+                <tr>
+                  <td>Aspectos negativos</td>
+                  {rEstilo.negativos.map((n) => (
+                    <td class:list={{ max: n === max(rEstilo.negativos) }}>{n}</td>
+                  ))}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {tablas.map((t) => (
+            <>
+              <h2>{t.titulo} marcados</h2>
+              <div class="tabla-envoltura">
+                <table class="tabla">
+                  <thead>
+                    <tr>
+                      <th>Estilo</th>
+                      {t.secciones.map((s) => (
+                        <th>{s.titulo}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {estilos.map((e, c) => (
+                      <tr>
+                        <td>
+                          <strong>{e}</strong>
+                        </td>
+                        {t.secciones.map((s) => (
+                          <td>
+                            <ul class="marcas">
+                              {s.filas
+                                .map((f, i) => ({ texto: f[c], id: idMarca(t.id, s.id, i, c) }))
+                                .filter((m) => marcas.has(m.id))
+                                .map((m) => (
+                                  <li>{m.texto}</li>
+                                ))}
+                            </ul>
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          ))}
+        </>
+      ) : (
+        <>
+          <div class="resultado">
+            <div>
+              <small>Somatotipo físico · {rSoma.puntos} puntos</small>
+              <strong>{rSoma.fisico}</strong>
+            </div>
+            <div>
+              <small>Somatotipo interno (comunicación)</small>
+              <strong>{rSoma.interno}</strong>
+            </div>
+            <div>
+              <small>Somatotipo estético</small>
+              <strong>{rSoma.estetico}</strong>
+            </div>
+          </div>
+
+          <h2>Puntos</h2>
+          <div class="tabla-envoltura">
+            <table class="tabla tabla--num">
+              <thead>
+                <tr>
+                  <th>Letra</th>
+                  <th>Respuestas</th>
+                  <th>Valor</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                {letras.map((l) => (
+                  <tr>
+                    <td>{l}</td>
+                    <td>{rSoma.conteo[l]}</td>
+                    <td>× {puntosPorLetra[l]}</td>
+                    <td>{rSoma.conteo[l] * puntosPorLetra[l]}</td>
+                  </tr>
+                ))}
+                <tr>
+                  <td>
+                    <strong>Total</strong>
+                  </td>
+                  <td />
+                  <td />
+                  <td class="max">{rSoma.puntos}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2>Respuestas</h2>
+          <div class="tabla-envoltura">
+            <table class="tabla">
+              <thead>
+                <tr>
+                  <th>Pregunta</th>
+                  <th>Respuesta</th>
+                  <th>Letra</th>
+                </tr>
+              </thead>
+              <tbody>
+                {preguntas.map((p, i) => (
+                  <tr>
+                    <td>{p.texto}</td>
+                    <td>{p.opciones[letras.indexOf(soma.fisico[i])]}</td>
+                    <td>{soma.fisico[i]}</td>
+                  </tr>
+                ))}
+                <tr>
+                  <td>Comunicación interna enfocada a</td>
+                  <td>{comunicacion.find((c) => c.valor === soma.comunicacion)?.puntos.join(', ')}</td>
+                  <td>{rSoma.interno}</td>
+                </tr>
+                <tr>
+                  <td>Estética personal</td>
+                  <td>{estetico.find((e) => e.valor === soma.estetico)?.texto}</td>
+                  <td>{rSoma.estetico}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </>
+      )
+    }
+  </div>
+</Base>

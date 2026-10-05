@@ -1,0 +1,19 @@
+---
+import { enlaceContacto, etiquetaContacto } from '../config/site';
+
+interface Props {
+  mensaje?: string;
+}
+const { mensaje } = Astro.props;
+---
+
+<section class="seccion cta">
+  <div class="contenedor">
+    <p class="kicker">¿Lista para empezar?</p>
+    <h2>Tu imagen es una herramienta poderosa. <em>Hagamos que hable con intención.</em></h2>
+    <p>Cuéntame qué quieres conseguir con tu imagen y juntas encontraremos el punto de partida que mejor se adapte a ti.</p>
+    <div class="acciones">
+      <a class="boton" href={enlaceContacto(mensaje)} target="_blank" rel="noopener">{etiquetaContacto}</a>
+    </div>
+  </div>
+</section>

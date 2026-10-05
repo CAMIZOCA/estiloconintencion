@@ -1,0 +1,120 @@
+---
+import Base from '../layouts/Base.astro';
+import TarjetaServicio from '../components/TarjetaServicio.astro';
+import CTA from '../components/CTA.astro';
+import { site, enlaceContacto } from '../config/site';
+import { servicios } from '../data/servicios';
+import { negocio, persona } from '../lib/seo';
+
+const web = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: site.nombre,
+  url: site.url,
+  inLanguage: 'es-EC',
+};
+---
+
+<Base
+  titulo={`${site.nombre} | ${site.persona}, Asesora de Imagen en ${site.ciudad}`}
+  jsonld={[web, negocio, persona]}
+>
+  <div class="contenedor hero">
+    <div>
+      <p class="kicker">Asesoría de imagen · {site.ciudad} y online</p>
+      <h1>Estilo <em>con intención</em></h1>
+      <hr class="regla" />
+      <p class="entrada">{site.lema}</p>
+      <p class="hero__firma">{site.persona} <span>| {site.rol}</span></p>
+      <p>
+        Te acompaño a construir una imagen que se sienta como tú, se adapte a tu vida y te ayude a proyectar lo que
+        quieres comunicar.
+      </p>
+      <div class="acciones">
+        <a class="boton" href="/servicios">Ver servicios y precios</a>
+        <a class="boton boton--linea" href={enlaceContacto()} target="_blank" rel="noopener">Agenda tu valoración</a>
+      </div>
+    </div>
+    <div class="hero__foto">
+      <img
+        src="/img/vilma-retrato.webp"
+        srcset="/img/vilma-retrato-400.webp 400w, /img/vilma-retrato.webp 695w"
+        sizes="(max-width: 820px) 100vw, 45vw"
+        width="695"
+        height="1111"
+        alt="Vilma Chacón, asesora de imagen, sonriendo con camisa blanca"
+        fetchpriority="high"
+      />
+    </div>
+  </div>
+
+  <section class="seccion seccion--blanca">
+    <div class="contenedor">
+      <p class="kicker">Servicios</p>
+      <h2>¿Qué quieres <em>transformar hoy?</em></h2>
+      <p class="entrada">
+        No todas necesitamos lo mismo. Por eso puedes comenzar por aquello que hoy representa una necesidad para ti.
+      </p>
+      <div class="rejilla">
+        {servicios.map((s) => <TarjetaServicio servicio={s} />)}
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion">
+    <div class="contenedor dos">
+      <img
+        src="/img/vilma-denim.webp"
+        srcset="/img/vilma-denim-400.webp 400w, /img/vilma-denim.webp 720w"
+        sizes="(max-width: 820px) 100vw, 45vw"
+        width="720"
+        height="1152"
+        loading="lazy"
+        alt="Vilma Chacón con chaqueta de jean al hombro"
+        style="aspect-ratio:4/5;object-position:top"
+      />
+      <div>
+        <p class="kicker">Sobre mí</p>
+        <h2>Más que apariencia, <em>una imagen con propósito.</em></h2>
+        <p>
+          Soy {site.persona}, asesora de imagen integral. Trabajo contigo —de forma presencial en {site.ciudad}, virtual
+          o híbrida— para que tu forma de vestir deje de ser improvisación y se convierta en una herramienta a tu favor.
+        </p>
+        <p>
+          Color, estilo, silueta y clóset: cada proceso parte de quién eres y de lo que quieres comunicar, no de reglas
+          genéricas.
+        </p>
+        <div class="acciones">
+          <a class="boton boton--linea" href="/sobre-mi">Conóceme</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion seccion--blanca">
+    <div class="contenedor">
+      <p class="kicker">Cómo trabajamos</p>
+      <h2>Un proceso claro, <em>a tu ritmo.</em></h2>
+      <div class="pasos">
+        <div>
+          <h3>Valoración</h3>
+          <p>Una primera sesión para entender cómo proyectas tu imagen hoy y qué quieres conseguir.</p>
+        </div>
+        <div>
+          <h3>Tu plan</h3>
+          <p>Elegimos el servicio o programa que mejor se adapta a ti: color, clóset, estilo o el proceso completo.</p>
+        </div>
+        <div>
+          <h3>Sesiones</h3>
+          <p>Trabajamos juntas en sesiones presenciales o virtuales, con herramientas que puedes aplicar por ti misma.</p>
+        </div>
+        <div>
+          <h3>Resultados</h3>
+          <p>Te quedas con guías, paletas y combinaciones para seguir usando mucho después de la asesoría.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CTA />
+</Base>

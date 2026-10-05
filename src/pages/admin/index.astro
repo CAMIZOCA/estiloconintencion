@@ -1,0 +1,113 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../styles/admin.css';
+import { site } from '../../config/site';
+import { fecha, listar, nombresCuestionario } from '../../lib/respuestas';
+
+export const prerender = false;
+
+const cuestionario = Astro.url.searchParams.get('cuestionario') ?? '';
+const q = (Astro.url.searchParams.get('q') ?? '').trim();
+const filas = await listar({ cuestionario, q });
+
+const enlaces = [
+  { nombre: nombresCuestionario.estilo, url: `${site.url}/cuestionario/estilo` },
+  { nombre: nombresCuestionario.somatotipos, url: `${site.url}/cuestionario/somatotipos` },
+].map((e) => ({
+  ...e,
+  whatsapp: `https://wa.me/?text=${encodeURIComponent(`Hola, antes de nuestra sesión te pido completar este ${e.nombre.toLowerCase()}: ${e.url}`)}`,
+}));
+---
+
+<Base titulo="Respuestas — Panel privado" noindex simple>
+  <div class="admin">
+    <div class="admin__barra">
+      <h1 style="margin:0">Respuestas</h1>
+      <form method="post" action="/api/admin/logout">
+        <button class="boton boton--linea" type="submit">Cerrar sesión</button>
+      </form>
+    </div>
+
+    <div class="enlaces">
+      {
+        enlaces.map((e) => (
+          <div>
+            <strong>{e.nombre}</strong>
+            <code>{e.url}</code>
+            <div class="admin__grupo">
+              <button class="boton boton--linea" type="button" data-copiar={e.url}>
+                Copiar enlace
+              </button>
+              <a class="boton" href={e.whatsapp} target="_blank" rel="noopener">
+                Enviar por WhatsApp
+              </a>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="admin__barra">
+      <form method="get">
+        <select name="cuestionario" aria-label="Cuestionario">
+          <option value="">Todos los cuestionarios</option>
+          <option value="estilo" selected={cuestionario === 'estilo'}>{nombresCuestionario.estilo}</option>
+          <option value="somatotipos" selected={cuestionario === 'somatotipos'}>{nombresCuestionario.somatotipos}</option>
+        </select>
+        <input type="search" name="q" value={q} placeholder="Buscar por nombre o contacto" />
+        <button class="boton" type="submit">Filtrar</button>
+      </form>
+      <a class="boton boton--linea" href={`/api/admin/export.csv${cuestionario ? `?cuestionario=${cuestionario}` : ''}`}>
+        Descargar CSV (Excel)
+      </a>
+    </div>
+
+    {
+      filas.length === 0 ? (
+        <p>Todavía no hay respuestas{q || cuestionario ? ' con ese filtro' : ''}.</p>
+      ) : (
+        <div class="tabla-envoltura">
+          <table class="tabla">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Clienta</th>
+                <th>Cuestionario</th>
+                <th>Resultado</th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {filas.map((f) => (
+                <tr>
+                  <td style="white-space:nowrap">{fecha(f.creado_en)}</td>
+                  <td>
+                    <strong>{f.nombre}</strong>
+                    <br />
+                    {f.contacto}
+                  </td>
+                  <td>{nombresCuestionario[f.cuestionario]}</td>
+                  <td>{f.resumen}</td>
+                  <td>
+                    <a href={`/admin/${f.id}`}>Ver</a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )
+    }
+  </div>
+
+  <script>
+    document.querySelectorAll<HTMLButtonElement>('[data-copiar]').forEach((b) =>
+      b.addEventListener('click', async () => {
+        await navigator.clipboard.writeText(b.dataset.copiar!);
+        const antes = b.textContent;
+        b.textContent = '¡Copiado!';
+        setTimeout(() => (b.textContent = antes), 1500);
+      }),
+    );
+  </script>
+</Base>

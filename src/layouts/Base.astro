@@ -1,0 +1,164 @@
+---
+import '@fontsource-variable/dm-sans';
+import '@fontsource-variable/playfair-display';
+import '@fontsource-variable/playfair-display/wght-italic.css';
+import '../styles/global.css';
+import { site, enlaceContacto, etiquetaContacto } from '../config/site';
+
+interface Props {
+  titulo: string;
+  descripcion?: string;
+  imagen?: string;
+  noindex?: boolean;
+  jsonld?: object[];
+  // Los cuestionarios y el panel usan una cabecera mínima, sin navegación.
+  simple?: boolean;
+}
+
+const { titulo, descripcion = site.descripcion, imagen = '/og/general.jpg', noindex = false, jsonld = [], simple = false } = Astro.props;
+// Al prerenderizar, la ruta llega como /pagina.html; la URL pública no lleva extensión.
+const ruta = Astro.url.pathname.replace(/(\/index)?\.html$/, '').replace(/\/$/, '') || '/';
+const canonica = new URL(ruta, site.url).href;
+const imagenAbs = new URL(imagen, site.url).href;
+const tituloCompleto = titulo.includes(site.nombre) ? titulo : `${titulo} | ${site.nombre}`;
+const nav = [
+  { href: '/servicios', texto: 'Servicios' },
+  { href: '/sobre-mi', texto: 'Sobre mí' },
+  { href: '/contacto', texto: 'Contacto' },
+];
+const cinta = ['Asesoría personalizada', 'Presencial', 'Virtual', 'Híbrida', 'Estrategia', 'Estilo', 'Resultados', 'Guayaquil y online'];
+---
+
+<!doctype html>
+<html lang="es-EC">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{tituloCompleto}</title>
+    <meta name="description" content={descripcion} />
+    <link rel="canonical" href={canonica} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <meta name="theme-color" content="#6B2D3E" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.nombre} />
+    <meta property="og:locale" content="es_EC" />
+    <meta property="og:title" content={titulo} />
+    <meta property="og:description" content={descripcion} />
+    <meta property="og:url" content={canonica} />
+    <meta property="og:image" content={imagenAbs} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:alt" content={`${site.nombre} — ${site.persona}, ${site.rol}`} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={titulo} />
+    <meta name="twitter:description" content={descripcion} />
+    <meta name="twitter:image" content={imagenAbs} />
+
+    {jsonld.map((dato) => <script type="application/ld+json" set:html={JSON.stringify(dato).replace(/</g, '\\u003c')} />)}
+  </head>
+  <body>
+    <header class="cabecera">
+      <div class="contenedor cabecera__fila">
+        <a class="logo" href="/" aria-label={`${site.nombre} — inicio`}>
+          <small>Estilo con intención</small>
+          <span>VILMA</span>
+        </a>
+        {
+          !simple && (
+            <>
+              <button class="menu-boton" aria-label="Abrir menú" aria-expanded="false" aria-controls="nav">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                  <path d="M3 7h18M3 12h18M3 17h18" />
+                </svg>
+              </button>
+              <nav class="nav" id="nav" aria-label="Principal">
+                {nav.map((n) => (
+                  <a href={n.href} aria-current={ruta.startsWith(n.href) ? 'page' : undefined}>
+                    {n.texto}
+                  </a>
+                ))}
+                <a class="boton" href={enlaceContacto()} target="_blank" rel="noopener">
+                  Agenda tu valoración
+                </a>
+              </nav>
+            </>
+          )
+        }
+      </div>
+    </header>
+
+    {
+      !simple && (
+        <div class="cinta" aria-hidden="true">
+          <div class="cinta__pista">
+            {[...cinta, ...cinta, ...cinta, ...cinta].map((t) => (
+              <span>{t} ·</span>
+            ))}
+          </div>
+        </div>
+      )
+    }
+
+    <main>
+      <slot />
+    </main>
+
+    {
+      !simple && (
+        <>
+          <footer class="pie">
+            <div class="contenedor">
+              <div class="pie__fila">
+                <div>
+                  <a class="logo" href="/">
+                    <small>Estilo con intención</small>
+                    <span>VILMA</span>
+                  </a>
+                  <p style="margin-top:1rem;max-width:22rem">
+                    {site.persona} · {site.rol}. Asesoría presencial en {site.ciudad} y virtual para cualquier lugar.
+                  </p>
+                </div>
+                <ul>
+                  <li><a href="/servicios">Servicios y precios</a></li>
+                  <li><a href="/sobre-mi">Sobre mí</a></li>
+                  <li><a href="/contacto">Contacto</a></li>
+                  <li><a href="/privacidad">Privacidad</a></li>
+                </ul>
+                <ul>
+                  <li>
+                    <a href={`https://www.instagram.com/${site.instagram}/`} target="_blank" rel="noopener">
+                      Instagram @{site.instagram}
+                    </a>
+                  </li>
+                  <li><a href={`mailto:${site.email}`}>{site.email}</a></li>
+                  {site.whatsapp && <li><a href={enlaceContacto()} target="_blank" rel="noopener">WhatsApp</a></li>}
+                </ul>
+              </div>
+              <div class="pie__legal">
+                <span>© {new Date().getFullYear()} {site.nombre} · {site.persona}</span>
+                <span>Estrategia · Estilo · Resultados</span>
+              </div>
+            </div>
+          </footer>
+          <a class="flotante" href={enlaceContacto()} target="_blank" rel="noopener" aria-label={etiquetaContacto}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20.5l1.7-5.1A8.5 8.5 0 1 1 21 11.5Z" stroke-linejoin="round" />
+            </svg>
+          </a>
+          <script>
+            const boton = document.querySelector<HTMLButtonElement>('.menu-boton');
+            const nav = document.getElementById('nav');
+            boton?.addEventListener('click', () => {
+              const abierto = nav!.classList.toggle('abierto');
+              boton.setAttribute('aria-expanded', String(abierto));
+            });
+          </script>
+        </>
+      )
+    }
+  </body>
+</html>
