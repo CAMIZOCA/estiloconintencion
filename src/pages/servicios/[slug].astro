@@ -57,7 +57,8 @@ const mensaje = `Hola Vilma, me interesa el servicio "${s.nombre}".`;
               />
             )
           }
-          <dl class="ficha">
+          <div class="ficha">
+<dl style="margin:0">
             <dt>Duración</dt>
             <dd>{s.duracion}</dd>
             <dt>Modalidad</dt>
@@ -72,10 +73,11 @@ const mensaje = `Hola Vilma, me interesa el servicio "${s.nombre}".`;
                 ))
               }
             </dd>
+            </dl>
             <a class="boton" style="width:100%" href={enlaceContacto(mensaje)} target="_blank" rel="noopener">
               {etiquetaContacto}
             </a>
-          </dl>
+            </div>
         </aside>
       </div>
     </div>

@@ -6,6 +6,10 @@
   "compatibility_flags": ["nodejs_compat"],
   "assets": { "directory": "./dist", "binding": "ASSETS" },
   "observability": { "enabled": true },
+  "routes": [
+    { "pattern": "estiloconintencion.com", "custom_domain": true },
+    { "pattern": "www.estiloconintencion.com", "custom_domain": true }
+  ],
   "d1_databases": [
     {
       "binding": "DB",

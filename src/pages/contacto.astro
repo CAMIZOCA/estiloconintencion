@@ -25,7 +25,8 @@ import { migas, negocio } from '../lib/seo';
           > es el primer paso.
         </p>
       </div>
-      <dl class="ficha">
+      <div class="ficha">
+<dl style="margin:0">
         {
           site.whatsapp && (
             <>
@@ -46,8 +47,9 @@ import { migas, negocio } from '../lib/seo';
         <dd><a href={`mailto:${site.email}`}>{site.email}</a></dd>
         <dt>Modalidad</dt>
         <dd>Presencial en {site.ciudad} · Virtual · Híbrida</dd>
+        </dl>
         <a class="boton" style="width:100%" href={enlaceContacto()} target="_blank" rel="noopener">Agenda tu valoración</a>
-      </dl>
+        </div>
     </div>
   </section>
 </Base>
